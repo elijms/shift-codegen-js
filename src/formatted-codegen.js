@@ -1,6 +1,6 @@
-import objectAssign from 'object-assign';
-import { keyword } from 'esutils';
-import { Precedence, getPrecedence, escapeStringLiteral, CodeRep, Empty, Token, NumberCodeRep, Paren, Bracket, Brace, NoIn, ContainsIn, Seq, SemiOp } from './coderep';
+const objectAssign = require('object-assign');
+const { keyword } = require('esutils');
+const { Precedence, getPrecedence, escapeStringLiteral, CodeRep, Empty, Token, NumberCodeRep, Paren, Bracket, Brace, NoIn, ContainsIn, Seq, SemiOp } = require('./coderep');
 
 const INDENT = '  ';
 class Linebreak extends CodeRep {
@@ -349,9 +349,8 @@ Sep.BEFORE_FUNCTION_NAME = function (node) {
     node,
   };
 };
-export { Sep };
 
-export class ExtensibleCodeGen {
+class ExtensibleCodeGen {
   parenToAvoidBeingDirective(element, original) {
     if (element && element.type === 'ExpressionStatement' && element.expression.type === 'LiteralStringExpression') {
       return seq(this.paren(original.children[0], Sep.PAREN_AVOIDING_DIRECTIVE_BEFORE, Sep.PAREN_AVOIDING_DIRECTIVE_AFTER), this.semiOp());
@@ -619,7 +618,8 @@ export class ExtensibleCodeGen {
   }
 
   reduceCatchClause(node, { binding, body }) {
-    return seq(this.t('catch'), this.sep(Sep.BEFORE_CATCH_BINDING), this.paren(binding, Sep.CATCH_PAREN_BEFORE, Sep.CATCH_PAREN_AFTER), this.sep(Sep.AFTER_CATCH_BINDING), body);
+    if (binding != null) return seq(this.t('catch'), this.sep(Sep.BEFORE_CATCH_BINDING), this.paren(binding, Sep.CATCH_PAREN_BEFORE, Sep.CATCH_PAREN_AFTER), this.sep(Sep.AFTER_CATCH_BINDING), body);
+    return seq(this.t('catch'), this.sep(Sep.BEFORE_CATCH_BINDING), body);
   }
 
   reduceClassDeclaration(node, { name, super: _super, elements }) {
@@ -1172,7 +1172,7 @@ function indent(rep, includingFinal) {
   return rep;
 }
 
-export class FormattedCodeGen extends ExtensibleCodeGen {
+class FormattedCodeGen extends ExtensibleCodeGen {
   parenToAvoidBeingDirective(element, original) {
     if (element && element.type === 'ExpressionStatement' && element.expression.type === 'LiteralStringExpression') {
       return seq(this.paren(original.children[0], Sep.PAREN_AVOIDING_DIRECTIVE_BEFORE, Sep.PAREN_AVOIDING_DIRECTIVE_AFTER), this.semiOp(), this.sep(Sep.AFTER_STATEMENT(element)));
@@ -1354,3 +1354,9 @@ export class FormattedCodeGen extends ExtensibleCodeGen {
     }
   }
 }
+
+module.exports = {
+  Sep,
+  ExtensibleCodeGen,
+  FormattedCodeGen,
+};

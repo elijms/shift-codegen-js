@@ -1,6 +1,6 @@
-import objectAssign from 'object-assign';
-import { keyword } from 'esutils';
-import { Precedence, getPrecedence, escapeStringLiteral, Empty, Token, RawToken, NumberCodeRep, Paren, Bracket, Brace, NoIn, ContainsIn, Seq, Semi, CommaSep, SemiOp } from './coderep';
+const objectAssign = require('object-assign');
+const { keyword } = require('esutils');
+const { Precedence, getPrecedence, escapeStringLiteral, Empty, Token, RawToken, NumberCodeRep, Paren, Bracket, Brace, NoIn, ContainsIn, Seq, Semi, CommaSep, SemiOp } = require('./coderep');
 
 function p(node, precedence, a) {
   return getPrecedence(node) < precedence ? paren(a) : a;
@@ -54,7 +54,7 @@ function getAssignmentExpr(state) {
   return state ? state.containsGroup ? paren(state) : state : empty();
 }
 
-export default class MinimalCodeGen {
+class MinimalCodeGen {
   parenToAvoidBeingDirective(element, original) {
     if (element && element.type === 'ExpressionStatement' && element.expression.type === 'LiteralStringExpression') {
       return seq(paren(original.children[0]), semiOp());
@@ -274,7 +274,8 @@ export default class MinimalCodeGen {
   }
 
   reduceCatchClause(node, { binding, body }) {
-    return seq(t('catch'), paren(binding), body);
+    if (binding != null) return seq(t('catch'), paren(binding), body);
+    return seq(t('catch'), body);
   }
 
   reduceClassDeclaration(node, { name, super: _super, elements }) {
@@ -787,3 +788,5 @@ export default class MinimalCodeGen {
       { endsWithMissingElse: body.endsWithMissingElse });
   }
 }
+
+module.exports = MinimalCodeGen;
